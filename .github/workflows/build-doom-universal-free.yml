@@ -1,0 +1,39 @@
+name: Build custom patch manager (no Doom universal patches)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out your Morphe Manager fork
+        uses: actions/checkout@v4
+      - name: Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Install Android components
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-37' 'build-tools;37.0.0' 'cmake;3.22.1'
+      - name: Exclude Doom universal patches (Expert Mode)
+        run: python3 .github/scripts/filter_doom_universal.py
+      - name: Build debug APK
+        run: |
+          chmod +x gradlew
+          ./gradlew :app:assembleDebug --no-daemon --stacktrace
+      - name: Upload APK
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: custom-patch-manager-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
