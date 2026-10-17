@@ -25,7 +25,7 @@ jobs:
           yes | sdkmanager --licenses >/dev/null || true
           sdkmanager 'platforms;android-37' 'build-tools;37.0.0' 'cmake;3.22.1'
       - name: Exclude Doom universal patches (Expert Mode)
-        run: python3 .github/scripts/filter_doom_universal.py
+        run: python3 filter_doom_universal.py
       - name: Build debug APK
         run: |
           chmod +x gradlew
@@ -37,3 +37,4 @@ jobs:
           name: custom-patch-manager-debug-apk
           path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
+
